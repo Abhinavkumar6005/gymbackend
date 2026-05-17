@@ -111,11 +111,17 @@ const allowedOrigins = [
   'http://localhost:3000',
   'https://gymfrontend.vercel.app',
   'https://gymfrontend-3h7cs8e9a-abhinav-kumars-projects-5d899f3e.vercel.app',
+  'https://gymfrontend-jjonl4p06-abhinav-kumars-projects-5d899f3e.vercel.app',
 ];
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development') {
+  const isAllowed = 
+    !origin ||
+    allowedOrigins.includes(origin) ||
+    (origin && origin.endsWith('.vercel.app'));
+
+  if (isAllowed) {
     res.header('Access-Control-Allow-Origin', origin || '*');
   }
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -124,11 +130,10 @@ app.use((req, res, next) => {
   if (req.method === 'OPTIONS') return res.sendStatus(200);
   next();
 });
-
 app.use(cors({
   origin: function(origin, callback) {
     if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development') {
+    if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
@@ -138,6 +143,7 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Cookie'],
 }));
+
 
 app.use(upload.any());
 app.use(express.json());
