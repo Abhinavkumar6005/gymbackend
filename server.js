@@ -57,7 +57,7 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500).json({ error: err.message || 'Internal server error' });
 });
 
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/gym_management')
+mongoose.connect(process.env.MONGODB_URI )
   .then(() => console.log('✅ MongoDB connected'))
   .catch(err => console.error('❌ MongoDB error:', err.message));
 
