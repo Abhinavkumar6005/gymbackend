@@ -68,9 +68,9 @@ const createOrder = async (req, res) => {
 
     // ✅ Allow paymentForMonths to be 0 (for donations or adjustments)
     // Check if paymentForMonths is provided (could be 0, which is valid)
-    if (!memberId || !amount || paymentForMonths === undefined || paymentForMonths === null) {
+    if (!memberId || !amount) {
       return res.status(400).json({ 
-        error: 'memberId, amount and paymentForMonths are required' 
+        error: 'memberId, amount are required' 
       });
     }
 
