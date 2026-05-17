@@ -21,12 +21,64 @@ const getRazorpay = () => {
 // ─── STEP 1: Create Razorpay Order ───────────────────────────────────────────
 // Frontend calls this first to get an order_id, then opens the Razorpay modal.
 
+// const createOrder = async (req, res) => {
+//   try {
+//     const { memberId, amount, paymentForMonths, paymentMethod } = req.body;
+
+//     if (!memberId || !amount ) {
+//       return res.status(400).json({ error: 'memberId, amount  are required' });
+//     }
+
+//     const member = await Member.findById(memberId);
+//     if (!member) return res.status(404).json({ error: 'Member not found' });
+
+//     // Razorpay expects amount in paise (1 INR = 100 paise)
+//     const amountInPaise = Math.round(amount * 100);
+
+//     const order = await getRazorpay().orders.create({
+//       amount:   amountInPaise,
+//       currency: 'INR',
+//       receipt:  `RCP-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+//       notes: {
+//         memberId:        memberId.toString(),
+//         memberName:      member.name,
+//         paymentForMonths: paymentForMonths.toString() || '0',
+//         paymentMethod:   paymentMethod || 'online',
+//       },
+//     });
+
+//     res.status(201).json({
+//       orderId:       order.id,          // send this to frontend → Razorpay modal
+//       amount:        order.amount,      // in paise
+//       currency:      order.currency,
+//       receipt:       order.receipt,
+//       keyId:         process.env.RAZORPAY_KEY_ID, // frontend needs this to init modal
+//       memberName:    member.name,
+//       memberEmail:   member.email,
+//       memberPhone:   member.phone,
+//     });
+//   } catch (error) {
+//     console.error('❌ createOrder error:', error);
+//     res.status(500).json({ error: error.message });
+//   }
+// };
 const createOrder = async (req, res) => {
   try {
     const { memberId, amount, paymentForMonths, paymentMethod } = req.body;
 
-    if (!memberId || !amount ) {
-      return res.status(400).json({ error: 'memberId, amount  are required' });
+    // ✅ Allow paymentForMonths to be 0 (for donations or adjustments)
+    // Check if paymentForMonths is provided (could be 0, which is valid)
+    if (!memberId || !amount || paymentForMonths === undefined || paymentForMonths === null) {
+      return res.status(400).json({ 
+        error: 'memberId, amount and paymentForMonths are required' 
+      });
+    }
+
+    // ✅ Validate that paymentForMonths is a non-negative number
+    if (typeof paymentForMonths !== 'number' || paymentForMonths < 0) {
+      return res.status(400).json({ 
+        error: 'paymentForMonths must be a non-negative number' 
+      });
     }
 
     const member = await Member.findById(memberId);
@@ -42,17 +94,17 @@ const createOrder = async (req, res) => {
       notes: {
         memberId:        memberId.toString(),
         memberName:      member.name,
-        paymentForMonths: paymentForMonths.toString() || '0',
+        paymentForMonths: String(paymentForMonths), // Convert to string for notes
         paymentMethod:   paymentMethod || 'online',
       },
     });
 
     res.status(201).json({
-      orderId:       order.id,          // send this to frontend → Razorpay modal
-      amount:        order.amount,      // in paise
+      orderId:       order.id,
+      amount:        order.amount,
       currency:      order.currency,
       receipt:       order.receipt,
-      keyId:         process.env.RAZORPAY_KEY_ID, // frontend needs this to init modal
+      keyId:         process.env.RAZORPAY_KEY_ID,
       memberName:    member.name,
       memberEmail:   member.email,
       memberPhone:   member.phone,
@@ -62,7 +114,6 @@ const createOrder = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
 // ─── STEP 2: Verify Payment & Save to DB ─────────────────────────────────────
 // Frontend calls this after the Razorpay modal succeeds, with the 3 Razorpay IDs.
 // We verify the signature to ensure the payment wasn't tampered with.
