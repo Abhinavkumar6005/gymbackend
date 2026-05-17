@@ -110,7 +110,8 @@ const upload = multer({
 const allowedOrigins = [
   'http://localhost:3000',
   'https://gymfrontend.vercel.app',
-  'https://gymfrontend-3h7cs8e9a-abhinav-kumars-projects-5d899f3e.vercel.app'
+  'https://gymfrontend-3h7cs8e9a-abhinav-kumars-projects-5d899f3e.vercel.app',
+  'https://gymbackend-bt9z.onrender.com/'
 ];
 
 // CORS middleware - UPDATED VERSION
