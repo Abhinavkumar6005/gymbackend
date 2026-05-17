@@ -25,8 +25,8 @@ const createOrder = async (req, res) => {
   try {
     const { memberId, amount, paymentForMonths, paymentMethod } = req.body;
 
-    if (!memberId || !amount || !paymentForMonths) {
-      return res.status(400).json({ error: 'memberId, amount and paymentForMonths are required' });
+    if (!memberId || !amount ) {
+      return res.status(400).json({ error: 'memberId, amount  are required' });
     }
 
     const member = await Member.findById(memberId);
@@ -42,7 +42,7 @@ const createOrder = async (req, res) => {
       notes: {
         memberId:        memberId.toString(),
         memberName:      member.name,
-        paymentForMonths: paymentForMonths.toString(),
+        paymentForMonths: paymentForMonths.toString() || '0',
         paymentMethod:   paymentMethod || 'online',
       },
     });
