@@ -41,6 +41,32 @@ app.use(cookieParser());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 
+
+// Add these at the TOP of your routes (after app = express())
+
+// Root route - handles GET requests to /
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'Ironforge Gym API is running! 🏋️',
+    status: 'active',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// HEAD route - Render uses this for health checks
+app.head('/', (req, res) => {
+  res.status(200).end();
+});
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'healthy',
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString()
+  });
+});
+
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/plans', require('./routes/plans'));
 app.use('/api/members', require('./routes/members'));
